@@ -1,0 +1,5 @@
+# Suíte de testes automatizados
+pytest>=8.0.0
+
+# Opcional: formatação visual rica no terminal para a CLI
+rich>=13.7.0
