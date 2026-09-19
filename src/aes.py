@@ -3,7 +3,7 @@ Núcleo algorítmico do AES-128 contendo as transformações sobre a matriz de e
 e a orquestração dos rounds de cifragem e decifragem.
 """
 
-from src.sbox import INV_SBOX
+from src.sbox import INV_SBOX, SBOX
 from src.galois import multiply
 
 # Matriz de mistura direta para a cifragem
@@ -30,7 +30,19 @@ def bytes_to_matrix(data: bytes) -> list[list[int]]:
     :param data: Bloco de 16 bytes.
     :return: Matriz 4x4 de inteiros.
     """
-    pass
+    if len(data) != 16:
+        raise ValueError(f"O bloco deve ter exatamente 16 bytes, recebido {len(data)}.")
+
+    # Cria uma matriz 4x4 vazia com zeros: 4 linhas por 4 colunas
+    matrix = [[0] * 4 for _ in range(4)]
+
+    # Preenche navegando primeiro pelas colunas, depois pelas linhas
+    for col in range(4):
+        for row in range(4):
+            # O byte atual vem da fórmula: 4 * col + row
+            matrix[row][col] = data[col * 4 + row]
+
+    return matrix
 
 
 def matrix_to_bytes(state: list[list[int]]) -> bytes:
@@ -40,7 +52,21 @@ def matrix_to_bytes(state: list[list[int]]) -> bytes:
     :param state: Matriz 4x4 de inteiros.
     :return: Sequência de 16 bytes.
     """
-    pass
+    # Garante que a matriz tem 4 linhas e que cada linha tem 4 colunas
+    valida = len(state) == 4 and all(len(row) == 4 for row in state)
+
+    if not valida:
+            raise ValueError(f"A matriz deve ter exatamente 16 bytes")
+
+    data = []
+
+    for col in range (4):
+        for row in range (4):
+            data.append(state[row][col])
+
+    resultado = bytes(data)
+
+    return resultado
 
 
 def sub_bytes(state: list[list[int]], sbox: list[int]) -> None:
@@ -63,7 +89,18 @@ def shift_rows(state: list[list[int]]) -> None:
     
     :param state: Matriz 4x4 de inteiros.
     """
-    pass
+
+    # linha 0 não se mexe
+
+    # linha 1 vai 1 para esquerda
+    state[1] = state[1][1:] + state[1][:1]
+
+    # linha 2 vai 2 para esquerda
+    state[2] = state[2][2:] + state[2][:2]
+
+    # linha 3, vai 3 para a esquerda
+    state[3] = state[3][3:] + state[3][:3]
+
 
 
 def inv_shift_rows(state: list[list[int]]) -> None:
@@ -113,7 +150,15 @@ def add_round_key(state: list[list[int]], round_key: list[list[int]]) -> None:
     :param state: Matriz 4x4 de inteiros.
     :param round_key: Matriz 4x4 de inteiros com a subchave da rodada.
     """
-    pass
+    valida = len(state) == 4 and all(len(row) == 4 for row in state) # valida tamanhos 
+    validaChave = len(round_key) == 4 and all(len(row) == 4 for row in round_key)
+
+    if not (valida and validaChave):
+        raise ValueError(f"A matriz state e a round key devem ter exatamente 16 bytes")
+
+    for row in range(4):
+        for col in range(4):
+            state[row][col] = state[row][col] ^ round_key[row][col] # faz XOR bit a bit em cada byte das matrizes
 
 
 def cipher_block(block: bytes, round_keys: list[list[list[int]]]) -> bytes:
@@ -124,7 +169,24 @@ def cipher_block(block: bytes, round_keys: list[list[list[int]]]) -> bytes:
     :param round_keys: As 11 subchaves de 128 bits derivadas.
     :return: Bloco de 16 bytes cifrado.
     """
-    pass
+
+    state = bytes_to_matrix(block)
+
+    add_round_key(state, round_keys[0])
+
+    for round in range(1, 10): 
+        sub_bytes(state, SBOX)
+        shift_rows(state)
+        mix_columns(state, MIXER_MATRIX)
+        add_round_key(state, round_keys[round])
+
+    sub_bytes(state, SBOX)
+    shift_rows(state)
+    add_round_key(state, round_keys[10])
+
+    result = matrix_to_bytes(state)
+
+    return result
 
 
 def inv_cipher_block(block: bytes, round_keys: list[list[list[int]]]) -> bytes:
