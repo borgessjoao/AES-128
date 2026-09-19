@@ -71,3 +71,58 @@ def test_nist_key_expansion():
     assert round_keys[1][1][0] == 0xfa
     assert round_keys[1][2][0] == 0xfe
     assert round_keys[1][3][0] == 0x17
+
+# testes funções sub_bytes, inv_shift_rows e mix_columns de aes.py
+from src.aes import sub_bytes, inv_shift_rows, mix_columns, MIXER_MATRIX, INV_MIXER_MATRIX
+from src.sbox import INV_SBOX
+
+def test_generic_sub_bytes():
+    """Valida a substituição in-place genérica passando a INV_SBOX."""
+    state = [
+        [0x63, 0x00, 0x00, 0x00],
+        [0x00, 0x00, 0x00, 0x00],
+        [0x00, 0x00, 0x00, 0x00],
+        [0x00, 0x00, 0x00, 0x00]
+    ]
+    # SBOX[0x00] == 0x63, logo INV_SBOX[0x63] deve ser 0x00.
+    # O elemento 0,0 deve virar 0x00 e os outros 0x52 (pois INV_SBOX[0x00] == 0x52).
+    sub_bytes(state, INV_SBOX)
+    
+    assert state[0][0] == 0x00
+    assert state[0][1] == 0x52
+    assert state[1][0] == 0x52
+
+def test_inv_shift_rows():
+    """Valida a rotação correta das linhas para a direita."""
+    state = [
+        [0, 1, 2, 3],
+        [4, 5, 6, 7],
+        [8, 9, 10, 11],
+        [12, 13, 14, 15]
+    ]
+    inv_shift_rows(state)
+    
+    assert state[0] == [0, 1, 2, 3]         # Intacta
+    assert state[1] == [7, 4, 5, 6]         # 1 pra direita
+    assert state[2] == [10, 11, 8, 9]       # 2 pra direita
+    assert state[3] == [13, 14, 15, 12]     # 3 pra direita
+
+def test_mix_columns_symmetry():
+    """
+    Requisito Crítico: Valida a generalização do mix_columns. 
+    Aplicar MIXER_MATRIX e depois INV_MIXER_MATRIX deve restaurar o bloco.
+    """
+    original_state = [
+        [0x87, 0xF2, 0x4D, 0x97],
+        [0x6E, 0x4C, 0x90, 0xEC],
+        [0x46, 0xE7, 0x4A, 0xC3],
+        [0xA6, 0x8C, 0xD8, 0x95]
+    ]
+    state = [row[:] for row in original_state]
+    
+    # Cifragem
+    mix_columns(state, MIXER_MATRIX)
+    # Decifragem
+    mix_columns(state, INV_MIXER_MATRIX)
+    
+    assert state == original_state
