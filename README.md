@@ -1,6 +1,6 @@
 ---
 
-#AES-128 Block Cipher Implementation
+## AES-128 Block Cipher Implementation
 
 Implementação educacional e modular do algoritmo de criptografia simétrica **AES-128** (*Advanced Encryption Standard*) desenvolvida do zero em Python nativo (linha de comando), sem bibliotecas criptográficas externas.
 
@@ -95,7 +95,7 @@ pip install -r requirements.txt
 
 ### 2. Cifragem (`encrypt`)
 
-A interface permite cifrar mensagens informando a chave e a mensagem em formato texto (string) ou em Hexadecimal. É possível escolher o formato da saída cifrada.
+A interface permite cifrar mensagens informando a chave, em string ou em hexadecimal e a mensagem em formato texto (string). É possível escolher o formato da saída cifrada.
 
 **Parâmetros principais:**
 
