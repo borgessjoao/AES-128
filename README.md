@@ -2,9 +2,8 @@
 
 Integrantes do grupo:
 
+Ana Beatriz Oliveira Carulla - 831499  
 João da Silva Borges - 831605
-Ana Beatriz Oliveira Carulla - 831499
-
 
 Implementação educacional e modular do algoritmo de criptografia simétrica **AES-128** (*Advanced Encryption Standard*) desenvolvida do zero em Python nativo (linha de comando), sem bibliotecas criptográficas externas.
 
