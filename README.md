@@ -36,8 +36,6 @@ aes-128/
 
 ```
 
-*(Estrutura de diretórios consolidada)*
-
 ---
 
 ## 🧩 Módulos e Responsabilidades
