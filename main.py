@@ -31,7 +31,12 @@ def encrypt_flow(message_str: str, key_bytes: bytes, output_decimal: bool) -> st
     return format_ciphertext(full_ciphertext, to_decimal=output_decimal)
 
 
-def decrypt_flow(cipher_input: str, key_bytes: bytes, input_decimal: bool) -> str:
+def decrypt_flow(
+    cipher_input: str,
+    key_bytes: bytes,
+    input_decimal: bool,
+    output_hex: bool = False
+) -> str:
     """Orquestra a decifragem de uma sequência de blocos e recupera a mensagem original."""
     round_keys = expand_key(key_bytes)
 
@@ -50,7 +55,11 @@ def decrypt_flow(cipher_input: str, key_bytes: bytes, input_decimal: bool) -> st
     # 3. Remove o preenchimento PKCS#7
     unpadded_data = unpad(full_decrypted)
 
-    # 4. Tenta decodificar para texto legível
+    # 4. Retorna em hexadecimal se solicitado pela flag
+    if output_hex:
+        return unpadded_data.hex()
+
+    # 5. Tenta decodificar para texto legível
     try:
         return unpadded_data.decode("utf-8")
     except UnicodeDecodeError:
@@ -59,7 +68,8 @@ def decrypt_flow(cipher_input: str, key_bytes: bytes, input_decimal: bool) -> st
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="AES-128 CLI - Cifragem e Decifragem em Python Puro."
+        description="AES-128 CLI - Cifragem e Decifragem em Python Puro.",
+        epilog="Para documentação detalhada e exemplos de execução, consulte o README.md."
     )
     subparsers = parser.add_subparsers(dest="command", required=True, help="Modo de operação")
 
@@ -76,6 +86,7 @@ def main() -> None:
     dec_parser.add_argument("-k", "--key", required=True, help="Chave (16 caracteres ou 32 hexadecimais)")
     dec_parser.add_argument("--key-hex", action="store_true", help="Indica que a chave passada está em formato hexadecimal")
     dec_parser.add_argument("--format", choices=["hex", "dec"], default="hex", help="Formato da entrada cifrada (padrão: hex)")
+    dec_parser.add_argument("--out-format", choices=["str", "hex"], default="str", help="Formato da saída decifrada (padrão: str)")
 
     args = parser.parse_args()
 
@@ -95,9 +106,10 @@ def main() -> None:
             output = decrypt_flow(
                 cipher_input=args.cipher,
                 key_bytes=key_bytes,
-                input_decimal=(args.format == "dec")
+                input_decimal=(args.format == "dec"),
+                output_hex=(args.out_format == "hex")
             )
-            print("\nMensagem Decifrada:")
+            print(f"\nMensagem Decifrada ({args.out_format.upper()}):")
             print(output)
 
     except Exception as error:
