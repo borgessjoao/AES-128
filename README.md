@@ -48,7 +48,6 @@ aes-128/
 
 ```
 
-(Estrutura de diretórios consolidada)
 
 ---
 
@@ -84,11 +83,24 @@ aes-128/
 
 * Nenhuma biblioteca externa é necessária para o algoritmo central. Apenas `pytest` para rodar os testes automatizados.
 
+### Configuração do Ambiente
 
+Recomenda-se o uso de um ambiente virtual para isolamento das dependências de teste:
+
+**No Linux / macOS:**
 
 ```bash
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
+```
 
+**No Windows:**
+
+```bash
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1  
+pip install -r requirements.txt
 ```
 
 ---
